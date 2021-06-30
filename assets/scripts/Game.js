@@ -74,6 +74,8 @@ cc.Class({
         // 监听点击事件 todo 是否能够注册全局事件
         this.node.on(cc.Node.EventType.TOUCH_START, this.onTouchStart, this)
 
+        //注册键盘事件
+        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         this.initOneFruit()
 
     },
@@ -122,7 +124,36 @@ cc.Class({
         this.fruitCount++
         this.currentFruit = this.createFruitOnPos(0, 400, id)
     },
+    onKeyDown(event) {
+        const distance = 10
+        const fruit = this.currentFruit
+        switch (event.keyCode) {
+            case cc.macro.KEY.left:
+                var action =cc.moveBy(0.3, cc.v2(-distance, 0)).easing(cc.easeCubicActionIn());
+                fruit.runAction(action)
+                break;
+            case cc.macro.KEY.right:
+                var action = cc.moveBy(0.3, cc.v2(distance, 0)).easing(cc.easeCubicActionIn());
+                fruit.runAction(action)
+                break;
+            case cc.macro.KEY.space:
+                if (this.isCreating) return
+                this.isCreating = true
+                var action = cc.callFunc(() => {
+                    // 开启物理效果
+                    this.startFruitPhysics(fruit)
 
+                    // 1s后重新生成一个
+                    this.scheduleOnce(() => {
+                        const nextId = this.getNextFruitId()
+                        this.initOneFruit(nextId)
+                        this.isCreating = false
+                    }, 1)
+                })
+                fruit.runAction(action)
+                break;
+        }
+    },
     // 监听屏幕点击
     onTouchStart(e) {
         if (this.isCreating) return
