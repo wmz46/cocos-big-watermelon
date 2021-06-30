@@ -3,7 +3,7 @@
     var gamepadIndex = 0;
     var buttonFlags = [];
     var arrowFlags = []; //↑↗→↘↓↙←↖ 01234567 顺时针
-    var keyMap = ['A', 'B', null, 'X', 'Y', null, 'L', 'R', 'ZL', 'ZR', '-', '+', null, null, null, 'Home'];
+    var keyMap = ['A', 'B', 'X', 'Y', 'L', 'R', 'ZL', 'ZR', '-', '+', null, null, '↑','↓','←','→', 'Home'];
     var arrowMap = ['up', 'leftup', 'left', 'leftdown', 'down', 'rightdown', 'right', 'rightup'];
     window.addEventListener("gamepadconnected", function (e) {
         var gp = navigator.getGamepads()[e.gamepad.index];
@@ -21,7 +21,6 @@
         if (gp) {
             for (var i = 0; i < gp.buttons.length; i++) {
                 if (gp.buttons[i].value > 0) {
-                    console.info(i)
                     if (!buttonFlags[i]) {
                         buttonFlags[i] = true;
                     }
@@ -50,7 +49,6 @@
             //摇杆最后一个是十字方向键
             var arrow = gp.axes[gp.axes.length - 1];
             if (arrow == -1) {
-                console.info("↑");
                 for (var i = 0; i < 8; i++) {
                     if (i == 0) {
                         arrowFlags[i] = true;
@@ -75,7 +73,6 @@
                 });
                 window.dispatchEvent(ev);
             } else if (arrow < -4 / 7) {
-                console.info("↗");
                 for (var i = 0; i < 8; i++) {
                     if (i == 1) {
                         arrowFlags[i] = true;
@@ -99,7 +96,6 @@
                 });
                 window.dispatchEvent(ev);
             } else if (arrow < -2 / 7) {
-                console.info("→")
                 for (var i = 0; i < 8; i++) {
                     if (i == 2) {
                         arrowFlags[i] = true;
@@ -123,7 +119,6 @@
                 });
                 window.dispatchEvent(ev);
             } else if (arrow < 0) {
-                console.info("↘")
                 for (var i = 0; i < 8; i++) {
                     if (i == 3) {
                         arrowFlags[i] = true;
@@ -147,7 +142,6 @@
                 });
                 window.dispatchEvent(ev);
             } else if (arrow < 2 / 7) {
-                console.info("↓");
                 for (var i = 0; i < 8; i++) {
                     if (i == 4) {
                         arrowFlags[i] = true;
@@ -171,7 +165,6 @@
                 });
                 window.dispatchEvent(ev);
             } else if (arrow < 4 / 7) {
-                console.info("↙");
                 for (var i = 0; i < 8; i++) {
                     if (i == 5) {
                         arrowFlags[i] = true;
@@ -195,7 +188,6 @@
                 });
                 window.dispatchEvent(ev);
             } else if (arrow < 6 / 7) {
-                console.info('←');
                 for (var i = 0; i < 8; i++) {
                     if (i == 6) {
                         arrowFlags[i] = true;
@@ -219,7 +211,6 @@
                 });
                 window.dispatchEvent(ev);
             } else if (arrow == 1) {
-                console.info('↖');
                 for (var i = 0; i < 8; i++) {
                     if (i == 7) {
                         arrowFlags[i] = true;
@@ -259,7 +250,6 @@
             }
             //摇杆无需判断按一次还是多次
             if (gp.axes[0] > .5) {
-                console.info('→');
                 arrowFlags[2] = true;
                 if (arrowFlags[6]) {
                     //松开
@@ -278,7 +268,6 @@
                 });
                 window.dispatchEvent(keyDownEvent);
             } else if (gp.axes[0] < -.5) {
-                console.info('←');
                 arrowFlags[6] = true;
                 if (arrowFlags[2]) {
                     //松开
@@ -319,7 +308,6 @@
                 }
             }
             if (gp.axes[1] > .5) {
-                console.info('↓');
                 arrowFlags[4] = true;
                 if (arrowFlags[0]) {
                     //松开
@@ -338,7 +326,6 @@
                 });
                 window.dispatchEvent(ev);
             } else if (gp.axes[1] < -.5) {
-                console.info('↑');
                 arrowFlags[0] = true;
                 if (arrowFlags[4]) {
                     //松开
@@ -385,6 +372,7 @@
         }
     }
 })();
+
 
 const Fruit = cc.Class({
     name: 'FruitItem',
@@ -464,6 +452,11 @@ cc.Class({
 
         //注册键盘事件
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        var that = this;
+        window.addEventListener('gamepadKeyDownEvent', function (ev) {
+            that.onGamePadKeyDown(ev);
+        });
+
         this.initOneFruit()
 
     },
@@ -512,9 +505,40 @@ cc.Class({
         this.fruitCount++
         this.currentFruit = this.createFruitOnPos(0, 400, id)
     },
+    onGamePadKeyDown(ev) {
+        const distance = 10
+        const fruit = this.currentFruit
+        if (this.isCreating) return
+        switch (ev.detail.key) {
+            case '←':
+                var action =cc.moveBy(0.3, cc.v2(-distance, 0)).easing(cc.easeCubicActionIn());
+                fruit.runAction(action)
+                break;
+            case  '→':
+                var action = cc.moveBy(0.3, cc.v2(distance, 0)).easing(cc.easeCubicActionIn());
+                fruit.runAction(action)
+                break;
+            case 'A':
+                this.isCreating = true
+                var action = cc.callFunc(() => {
+                    // 开启物理效果
+                    this.startFruitPhysics(fruit)
+
+                    // 1s后重新生成一个
+                    this.scheduleOnce(() => {
+                        const nextId = this.getNextFruitId()
+                        this.initOneFruit(nextId)
+                        this.isCreating = false
+                    }, 1)
+                })
+                fruit.runAction(action)
+                break;
+        }
+    },
     onKeyDown(event) {
         const distance = 10
         const fruit = this.currentFruit
+        if (this.isCreating) return
         switch (event.keyCode) {
             case cc.macro.KEY.left:
                 var action =cc.moveBy(0.3, cc.v2(-distance, 0)).easing(cc.easeCubicActionIn());
@@ -525,7 +549,6 @@ cc.Class({
                 fruit.runAction(action)
                 break;
             case cc.macro.KEY.space:
-                if (this.isCreating) return
                 this.isCreating = true
                 var action = cc.callFunc(() => {
                     // 开启物理效果
