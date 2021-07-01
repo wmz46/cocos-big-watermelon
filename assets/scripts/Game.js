@@ -1,379 +1,3 @@
-(function () {
-    //当前手柄序号
-    var gamepadIndex = 0;
-    var buttonFlags = [];
-    var arrowFlags = []; //↑↗→↘↓↙←↖ 01234567 顺时针
-    var keyMap = ['A', 'B', 'X', 'Y', 'L', 'R', 'ZL', 'ZR', '-', '+', null, null, '↑','↓','←','→', 'Home'];
-    var arrowMap = ['up', 'leftup', 'left', 'leftdown', 'down', 'rightdown', 'right', 'rightup'];
-    window.addEventListener("gamepadconnected", function (e) {
-        var gp = navigator.getGamepads()[e.gamepad.index];
-        console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
-            gp.index, gp.id,
-            gp.buttons.length, gp.axes.length);
-        gamepadIndex = e.gamepad.index;
-        //循环监听
-        loopMonitor();
-    });
-
-    function loopMonitor() {
-        //必须每次都获取
-        var gp = navigator.getGamepads()[gamepadIndex];
-        if (gp) {
-            for (var i = 0; i < gp.buttons.length; i++) {
-                if (gp.buttons[i].value > 0) {
-                    if (!buttonFlags[i]) {
-                        buttonFlags[i] = true;
-                    }
-                    //按下
-                    var ev = new CustomEvent('gamepadKeyDownEvent', {
-                        detail: {
-                            num: i,
-                            key: keyMap[i]
-                        }
-                    });
-                    window.dispatchEvent(ev);
-                } else {
-                    if (buttonFlags[i]) {
-                        //松开
-                        var ev = new CustomEvent('gamepadKeyUpEvent', {
-                            detail: {
-                                num: i,
-                                key: keyMap[i]
-                            }
-                        });
-                        window.dispatchEvent(ev);
-                        buttonFlags[i] = false;
-                    }
-                }
-            }
-            //摇杆最后一个是十字方向键
-            var arrow = gp.axes[gp.axes.length - 1];
-            if (arrow == -1) {
-                for (var i = 0; i < 8; i++) {
-                    if (i == 0) {
-                        arrowFlags[i] = true;
-                    } else {
-                        if (arrowFlags[i]) {
-                            //松开
-                            arrowFlags[i] = false;
-                            var ev = new CustomEvent('gamepadAxisEndEvent', {
-                                detail: {
-                                    arrow: arrowMap[i]
-                                }
-                            });
-                            window.dispatchEvent(ev);
-                        }
-                    }
-                    arrowFlags[i] = (i == 0);
-                }
-                var ev = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'up'
-                    }
-                });
-                window.dispatchEvent(ev);
-            } else if (arrow < -4 / 7) {
-                for (var i = 0; i < 8; i++) {
-                    if (i == 1) {
-                        arrowFlags[i] = true;
-                    } else {
-                        if (arrowFlags[i]) {
-                            //松开
-                            arrowFlags[i] = false;
-                            var ev = new CustomEvent('gamepadAxisEndEvent', {
-                                detail: {
-                                    arrow: arrowMap[i]
-                                }
-                            });
-                            window.dispatchEvent(ev);
-                        }
-                    }
-                }
-                var ev = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'rightup'
-                    }
-                });
-                window.dispatchEvent(ev);
-            } else if (arrow < -2 / 7) {
-                for (var i = 0; i < 8; i++) {
-                    if (i == 2) {
-                        arrowFlags[i] = true;
-                    } else {
-                        if (arrowFlags[i]) {
-                            //松开
-                            arrowFlags[i] = false;
-                            var ev = new CustomEvent('gamepadAxisEndEvent', {
-                                detail: {
-                                    arrow: arrowMap[i]
-                                }
-                            });
-                            window.dispatchEvent(ev);
-                        }
-                    }
-                }
-                var ev = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'right'
-                    }
-                });
-                window.dispatchEvent(ev);
-            } else if (arrow < 0) {
-                for (var i = 0; i < 8; i++) {
-                    if (i == 3) {
-                        arrowFlags[i] = true;
-                    } else {
-                        if (arrowFlags[i]) {
-                            //松开
-                            arrowFlags[i] = false;
-                            var ev = new CustomEvent('gamepadAxisEndEvent', {
-                                detail: {
-                                    arrow: arrowMap[i]
-                                }
-                            });
-                            window.dispatchEvent(ev);
-                        }
-                    }
-                }
-                var ev = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'rightdown'
-                    }
-                });
-                window.dispatchEvent(ev);
-            } else if (arrow < 2 / 7) {
-                for (var i = 0; i < 8; i++) {
-                    if (i == 4) {
-                        arrowFlags[i] = true;
-                    } else {
-                        if (arrowFlags[i]) {
-                            //松开
-                            arrowFlags[i] = false;
-                            var ev = new CustomEvent('gamepadAxisEndEvent', {
-                                detail: {
-                                    arrow: arrowMap[i]
-                                }
-                            });
-                            window.dispatchEvent(ev);
-                        }
-                    }
-                }
-                var ev = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'down'
-                    }
-                });
-                window.dispatchEvent(ev);
-            } else if (arrow < 4 / 7) {
-                for (var i = 0; i < 8; i++) {
-                    if (i == 5) {
-                        arrowFlags[i] = true;
-                    } else {
-                        if (arrowFlags[i]) {
-                            //松开
-                            arrowFlags[i] = false;
-                            var ev = new CustomEvent('gamepadAxisEndEvent', {
-                                detail: {
-                                    arrow: arrowMap[i]
-                                }
-                            });
-                            window.dispatchEvent(ev);
-                        }
-                    }
-                }
-                var ev = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'leftdown'
-                    }
-                });
-                window.dispatchEvent(ev);
-            } else if (arrow < 6 / 7) {
-                for (var i = 0; i < 8; i++) {
-                    if (i == 6) {
-                        arrowFlags[i] = true;
-                    } else {
-                        if (arrowFlags[i]) {
-                            //松开
-                            arrowFlags[i] = false;
-                            var ev = new CustomEvent('gamepadAxisEndEvent', {
-                                detail: {
-                                    arrow: arrowMap[i]
-                                }
-                            });
-                            window.dispatchEvent(ev);
-                        }
-                    }
-                }
-                var ev = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'left'
-                    }
-                });
-                window.dispatchEvent(ev);
-            } else if (arrow == 1) {
-                for (var i = 0; i < 8; i++) {
-                    if (i == 7) {
-                        arrowFlags[i] = true;
-                    } else {
-                        if (arrowFlags[i]) {
-                            //松开
-                            arrowFlags[i] = false;
-                            var ev = new CustomEvent('gamepadAxisEndEvent', {
-                                detail: {
-                                    arrow: arrowMap[i]
-                                }
-                            });
-                            window.dispatchEvent(ev);
-                        }
-                    }
-                }
-                var ev = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'leftup'
-                    }
-                });
-                window.dispatchEvent(ev);
-            } else {
-                //松开
-                for (var i = 0; i < 8; i++) {
-                    if (arrowFlags[i]) {
-                        //松开
-                        arrowFlags[i] = false;
-                        var ev = new CustomEvent('gamepadAxisEndEvent', {
-                            detail: {
-                                arrow: arrowMap[i]
-                            }
-                        });
-                        window.dispatchEvent(ev);
-                    }
-                }
-            }
-            //摇杆无需判断按一次还是多次
-            if (gp.axes[0] > .5) {
-                arrowFlags[2] = true;
-                if (arrowFlags[6]) {
-                    //松开
-                    arrowFlags[6] = false;
-                    var ev = new CustomEvent('gamepadAxisEndEvent', {
-                        detail: {
-                            arrow: arrowMap[6]
-                        }
-                    });
-                    window.dispatchEvent(ev);
-                }
-                var keyDownEvent = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'right'
-                    }
-                });
-                window.dispatchEvent(keyDownEvent);
-            } else if (gp.axes[0] < -.5) {
-                arrowFlags[6] = true;
-                if (arrowFlags[2]) {
-                    //松开
-                    arrowFlags[2] = false;
-                    var ev = new CustomEvent('gamepadAxisEndEvent', {
-                        detail: {
-                            arrow: arrowMap[2]
-                        }
-                    });
-                    window.dispatchEvent(ev);
-                }
-                var ev = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'left'
-                    }
-                });
-                window.dispatchEvent(ev);
-            } else {
-                if (arrowFlags[2]) {
-                    //松开
-                    arrowFlags[2] = false;
-                    var ev = new CustomEvent('gamepadAxisEndEvent', {
-                        detail: {
-                            arrow: arrowMap[2]
-                        }
-                    });
-                    window.dispatchEvent(ev);
-                }
-                if (arrowFlags[6]) {
-                    //松开
-                    arrowFlags[6] = false;
-                    var ev = new CustomEvent('gamepadAxisEndEvent', {
-                        detail: {
-                            arrow: arrowMap[6]
-                        }
-                    });
-                    window.dispatchEvent(ev);
-                }
-            }
-            if (gp.axes[1] > .5) {
-                arrowFlags[4] = true;
-                if (arrowFlags[0]) {
-                    //松开
-                    arrowFlags[0] = false;
-                    var ev = new CustomEvent('gamepadAxisEndEvent', {
-                        detail: {
-                            arrow: arrowMap[0]
-                        }
-                    });
-                    window.dispatchEvent(ev);
-                }
-                var ev = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'down'
-                    }
-                });
-                window.dispatchEvent(ev);
-            } else if (gp.axes[1] < -.5) {
-                arrowFlags[0] = true;
-                if (arrowFlags[4]) {
-                    //松开
-                    arrowFlags[4] = false;
-                    var ev = new CustomEvent('gamepadAxisEndEvent', {
-                        detail: {
-                            arrow: arrowMap[4]
-                        }
-                    });
-                    window.dispatchEvent(ev);
-                }
-                var ev = new CustomEvent('gamepadAxisEvent', {
-                    detail: {
-                        arrow: 'up'
-                    }
-                });
-                window.dispatchEvent(ev);
-            } else {
-                if (arrowFlags[0]) {
-                    //松开
-                    arrowFlags[0] = false;
-                    var ev = new CustomEvent('gamepadAxisEndEvent', {
-                        detail: {
-                            arrow: arrowMap[0]
-                        }
-                    });
-                    window.dispatchEvent(ev);
-                }
-                if (arrowFlags[4]) {
-                    //松开
-                    arrowFlags[4] = false;
-                    var ev = new CustomEvent('gamepadAxisEndEvent', {
-                        detail: {
-                            arrow: arrowMap[4]
-                        }
-                    });
-                    window.dispatchEvent(ev);
-                }
-            }
-            //33毫秒检测一次
-            setTimeout(function () {
-                loopMonitor();
-            }, 33);
-        }
-    }
-})();
-
-
 const Fruit = cc.Class({
     name: 'FruitItem',
     properties: {
@@ -451,10 +75,42 @@ cc.Class({
         this.node.on(cc.Node.EventType.TOUCH_START, this.onTouchStart, this)
 
         //注册键盘事件
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        //这里的键盘事件只响应画布
+        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, function(ev){
+            var key;
+            switch(ev.keyCode){
+                case cc.macro.KEY.left:
+                    key = "←"
+                    break;
+                case cc.macro.KEY.right:
+                    key = "→"
+                    break;
+                case cc.macro.KEY.space:
+                    key = "A"
+                    break;
+            }
+            that.onKeyDown(key)
+        }, this);
         var that = this;
+        //响应全局键盘事件
+        window.addEventListener('keydown', function (ev) {
+            var key;
+            switch(ev.keyCode){
+                case cc.macro.KEY.left:
+                    key = "←"
+                    break;
+                case cc.macro.KEY.right:
+                    key = "→"
+                    break;
+                case cc.macro.KEY.space:
+                    key = "A"
+                    break;
+            }
+            that.onKeyDown(key)
+        });
+        //响应游戏手柄事件
         window.addEventListener('gamepadKeyDownEvent', function (ev) {
-            that.onGamePadKeyDown(ev);
+            that.onKeyDown(ev.detail.key);
         });
 
         this.initOneFruit()
@@ -505,51 +161,36 @@ cc.Class({
         this.fruitCount++
         this.currentFruit = this.createFruitOnPos(0, 400, id)
     },
-    onGamePadKeyDown(ev) {
-        const distance = 10
-        const fruit = this.currentFruit
+    onKeyDown(key) {
         if (this.isCreating) return
-        switch (ev.detail.key) {
+        this.isCreating = true
+        const distance = 5
+        const time = 0.1
+        const fruit = this.currentFruit
+        const {
+            width,
+            height
+        } = this.node
+        switch (key) {
             case '←':
-                var action =cc.moveBy(0.3, cc.v2(-distance, 0)).easing(cc.easeCubicActionIn());
-                fruit.runAction(action)
+                if (fruit.getPosition().x > -(width - fruit.width) / 2) {
+                    var action = cc.moveBy(time, cc.v2(-distance, 0)).easing(cc.easeCubicActionIn());
+                    fruit.runAction(action)
+                } else {
+                    fruit.stopAllActions();
+                }
+                this.isCreating = false
                 break;
-            case  '→':
-                var action = cc.moveBy(0.3, cc.v2(distance, 0)).easing(cc.easeCubicActionIn());
-                fruit.runAction(action)
+            case '→':
+                if (fruit.getPosition().x < (width - fruit.width) / 2) {
+                    var action = cc.moveBy(time, cc.v2(distance, 0)).easing(cc.easeCubicActionIn());
+                    fruit.runAction(action)
+                } else {
+                    fruit.stopAllActions();
+                }
+                this.isCreating = false
                 break;
             case 'A':
-                this.isCreating = true
-                var action = cc.callFunc(() => {
-                    // 开启物理效果
-                    this.startFruitPhysics(fruit)
-
-                    // 1s后重新生成一个
-                    this.scheduleOnce(() => {
-                        const nextId = this.getNextFruitId()
-                        this.initOneFruit(nextId)
-                        this.isCreating = false
-                    }, 1)
-                })
-                fruit.runAction(action)
-                break;
-        }
-    },
-    onKeyDown(event) {
-        const distance = 10
-        const fruit = this.currentFruit
-        if (this.isCreating) return
-        switch (event.keyCode) {
-            case cc.macro.KEY.left:
-                var action =cc.moveBy(0.3, cc.v2(-distance, 0)).easing(cc.easeCubicActionIn());
-                fruit.runAction(action)
-                break;
-            case cc.macro.KEY.right:
-                var action = cc.moveBy(0.3, cc.v2(distance, 0)).easing(cc.easeCubicActionIn());
-                fruit.runAction(action)
-                break;
-            case cc.macro.KEY.space:
-                this.isCreating = true
                 var action = cc.callFunc(() => {
                     // 开启物理效果
                     this.startFruitPhysics(fruit)
